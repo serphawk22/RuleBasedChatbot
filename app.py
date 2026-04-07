@@ -5,12 +5,12 @@ import pandas as pd
 import os
 
 app = Flask(__name__, static_folder="templates", static_url_path="/static")
-app.secret_key = "ally_tech_secret_key"  # Change this in production
+app.secret_key = os.environ.get("SECRET_KEY", "ally_tech_secret_key")  # Change this in production
 
 # ─── Configuration ───
-DATABASE = "allybot.db"
-EXCEL_FILE = "chatbot_rules.xlsx"
-ADMIN_PASSWORD = "allybot1122"  # Password to protect the data
+DATABASE = os.environ.get("DATABASE", "allybot.db")
+EXCEL_FILE = os.environ.get("EXCEL_FILE", "chatbot_rules.xlsx")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "allybot1122")  # Password to protect the data
 
 def init_db():
     """Create database table if it doesn't exist and ensure schema is up to date."""
@@ -32,6 +32,9 @@ def init_db():
         cursor.execute("ALTER TABLE registrations ADD COLUMN qualification TEXT")
     conn.commit()
     conn.close()
+
+# Ensure database schema exists when running under Gunicorn/WSGI
+init_db()
 
 # ─── Routes ───
 
