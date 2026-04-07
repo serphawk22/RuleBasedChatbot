@@ -87,4 +87,4 @@ def get_response(user_input: str, session_id: str = "default") -> str:
         if re.search(rule["pattern"], text, re.I):
             return rule["response"]
 
-    return FALLBACK
+    return "I'm sorry, I don't understand that. Can you please rephrase your question?"
