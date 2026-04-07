@@ -30,6 +30,10 @@ def load_dynamic_rules():
                     "pattern": str(row['Pattern']),
                     "response": str(row['Response'])
                 })
+            # Replace {domain} placeholder with environment variable
+            domain = os.environ.get("DOMAIN", "")
+            for rule in rules:
+                rule['response'] = rule['response'].replace("{domain}", domain)
             _cached_rules = rules
             _last_mtime = current_mtime
     except Exception as e:
