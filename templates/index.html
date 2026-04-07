@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AllyBot — Training Institute Assistant</title>
+    <meta name="description"
+        content="AllyBot is an intelligent chatbot for our Training Institute. Get instant help with courses, fees, duration, batches, and placements.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <!-- ═══════ Registration Overlay ═══════ -->
+    <div id="reg-overlay">
+        <div id="reg-card">
+            <div class="reg-header">
+                <img src="/static/logo.png" alt="Ally Tech Logo" class="brand-logo reg-brand">
+                <h2>Welcome to <span>AllyBot</span></h2>
+                <p>Register to start chatting with our institute assistant</p>
+            </div>
+            <form id="reg-form">
+                <div class="field">
+                    <label for="reg-name">Full Name</label>
+                    <input id="reg-name" type="text" placeholder="e.g. Rahul Sharma" required>
+                </div>
+                <div class="field">
+                    <label for="reg-email">Email</label>
+                    <input id="reg-email" type="email" placeholder="e.g. rahul@gmail.com" required>
+                </div>
+                <div class="field">
+                    <label for="reg-phone">Phone Number</label>
+                    <input id="reg-phone" type="tel" placeholder="e.g. 9876543210" required>
+                </div>
+                <div class="field">
+                    <label for="reg-qual">Highest Qualification</label>
+                    <select id="reg-qual" required>
+                        <option value="" disabled selected>Select qualification</option>
+                        <option value="BA">BA</option>
+                        <option value="B.Sc">B.Sc</option>
+                        <option value="B.C.A">B.C.A</option>
+                        <option value="B.E/B.Tech">B.E / B.Tech</option>
+                        <option value="BBA">BBA</option>
+                        <option value="BBM">BBM</option>
+                        <option value="Graduate">Graduate (Other)</option>
+                        <option value="Post-Graduate">Post-Graduate</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="reg-course">Interested Course</label>
+                    <select id="reg-course" required>
+                        <option value="" disabled selected>Select a course</option>
+                        <option value="Data Analytics (Excel, VBA, SQL, Power BI, Python, Prompt Engineering)">Data
+                            Analytics (Excel, VBA, SQL, Power BI, Python, Prompt Engineering)</option>
+                        <option value="ERP FICO (Financial Accounting Control)">ERP FICO (Financial Accounting Control)
+                        </option>
+                        <option value="ERP MM (Material Management & S4 HANA Logistics)">ERP MM (Material Management &
+                            S4 HANA Logistics)</option>
+                        <option value="ERP SD (Sales and Distribution S4 HANA)">ERP SD (Sales and Distribution S4 HANA)
+                        </option>
+                        <option value="ERP HCM (Human Capital Management)">ERP HCM (Human Capital Management)</option>
+                        <option value="ERP SF (Success Factor)">ERP SF (Success Factor)</option>
+                        <option value="ERP ABAP (Advanced Business Application Programming + HANA & RAP)">ERP ABAP
+                            (Advanced Business Application Programming + HANA & RAP)</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+                <button type="submit" id="reg-btn">
+                    <span id="reg-btn-text">Start Chat →</span>
+                    <span id="reg-spinner" class="spinner hidden"></span>
+                </button>
+                <p id="reg-error" class="reg-error hidden"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══════ Chat App (hidden until registered) ═══════ -->
+    <div id="app" class="hidden">
+        <header>
+            <div class="logo">
+                <img src="/static/logo.png" alt="Ally Tech Logo" class="brand-logo chat-brand">
+            </div>
+            <div class="status">
+                <span class="dot"></span> Online
+            </div>
+        </header>
+
+        <main id="chat">
+            <div id="messages"></div>
+        </main>
+
+        <div id="shortcuts">
+            <button class="chip" data-q="data analytics">📊 Data Analytics</button>
+            <button class="chip" data-q="erp">💼 ERP Special</button>
+            <button class="chip" data-q="location">📍 Location</button>
+            <button class="chip" data-q="fees">💰 Fees</button>
+            <button class="chip" data-q="placements">💼 Placements</button>
+            <button class="chip" data-q="contact">📞 Contact</button>
+        </div>
+
+        <footer>
+            <div class="input-bar">
+                <textarea id="user-input" placeholder="Type your question..." autocomplete="off" rows="1"></textarea>
+                <button id="send-btn" aria-label="Send message">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13" />
+                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                    </svg>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        /* ═══════ Registration ═══════ */
+        const regOverlay = document.getElementById('reg-overlay');
+        const regForm = document.getElementById('reg-form');
+        const regBtn = document.getElementById('reg-btn');
+        const regBtnText = document.getElementById('reg-btn-text');
+        const regSpinner = document.getElementById('reg-spinner');
+        const regError = document.getElementById('reg-error');
+        const appEl = document.getElementById('app');
+        let userName = '';
+
+        regForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            regError.classList.add('hidden');
+            regBtnText.textContent = 'Registering...';
+            regSpinner.classList.remove('hidden');
+            regBtn.disabled = true;
+
+            const payload = {
+                name: document.getElementById('reg-name').value.trim(),
+                email: document.getElementById('reg-email').value.trim(),
+                phone: document.getElementById('reg-phone').value.trim(),
+                qualification: document.getElementById('reg-qual').value,
+                course: document.getElementById('reg-course').value
+            };
+
+            try {
+                const res = await fetch('/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    userName = payload.name;
+                    const rec = data.recommendation;
+                    regOverlay.classList.add('fade-out');
+                    setTimeout(() => {
+                        regOverlay.classList.add('hidden');
+                        appEl.classList.remove('hidden');
+                        appEl.classList.add('fade-in');
+                        addMsg(`Hi <strong>${userName}</strong>! 👋 I'm <strong>AllyBot</strong>.<br><br>💡 <strong>Personalized Suggestion:</strong><br>${rec}<br><br>Ask me about courses, fees, or placements!`, 'bot');
+                        document.getElementById('user-input').focus();
+                    }, 400);
+                } else {
+                    regError.textContent = data.message;
+                    regError.classList.remove('hidden');
+                }
+            } catch {
+                regError.textContent = 'Connection error. Please try again.';
+                regError.classList.remove('hidden');
+            } finally {
+                regBtnText.textContent = 'Start Chat →';
+                regSpinner.classList.add('hidden');
+                regBtn.disabled = false;
+            }
+        });
+
+        /* ═══════ Chat Logic ═══════ */
+        const input = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const msgs = document.getElementById('messages');
+        const chatEl = document.getElementById('chat');
+
+        function ts() {
+            return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function addMsg(text, who) {
+            const div = document.createElement('div');
+            div.className = `msg ${who} fade-in`;
+            if (who === 'bot') {
+                div.innerHTML = `<div class="avatar">🤖</div><div class="bubble">${text}</div><span class="time">${ts()}</span>`;
+            } else {
+                div.innerHTML = `<div class="bubble">${text}</div><span class="time">${ts()}</span>`;
+            }
+            msgs.appendChild(div);
+            chatEl.scrollTo({ top: chatEl.scrollHeight, behavior: 'smooth' });
+        }
+
+        function showTyping() {
+            const d = document.createElement('div');
+            d.id = 'typing';
+            d.className = 'msg bot fade-in';
+            d.innerHTML = `<div class="avatar">🤖</div><div class="bubble typing"><span></span><span></span><span></span></div>`;
+            msgs.appendChild(d);
+            chatEl.scrollTo({ top: chatEl.scrollHeight, behavior: 'smooth' });
+        }
+
+        function hideTyping() {
+            const el = document.getElementById('typing');
+            if (el) el.remove();
+        }
+
+        async function send() {
+            const text = input.value.trim();
+            if (!text) return;
+            addMsg(text, 'user');
+            input.value = '';
+            input.style.height = 'auto'; // Reset height
+            showTyping();
+
+            try {
+                const res = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await res.json();
+                hideTyping();
+                addMsg(data.reply, 'bot');
+            } catch {
+                hideTyping();
+                addMsg("Oops — something went wrong. Please try again.", 'bot');
+            }
+        }
+
+        sendBtn.addEventListener('click', send);
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                send();
+            }
+        });
+
+        // Auto-resize textarea
+        input.addEventListener('input', () => {
+            input.style.height = 'auto';
+            input.style.height = (input.scrollHeight) + 'px';
+        });
+
+        document.querySelectorAll('.chip').forEach(btn => {
+            btn.addEventListener('click', () => {
+                input.value = btn.dataset.q;
+                send();
+            });
+        });
+    </script>
+
+</body>
+
+</html>
