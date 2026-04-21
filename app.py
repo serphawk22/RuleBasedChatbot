@@ -16,7 +16,12 @@ app = Flask(__name__, static_folder="templates", static_url_path="/static")
 app.secret_key = "7b2d9a4f6c1e3b5d8a0f9c2e4b7d1a5f6c8e0b2d4a9f3c1e5b7d8a0f2c4e6b9d"  # Auto-generated secure key
 
 # --- Configuration ---
-DATABASE = "allybot.db"
+# If running on Railway (or Render/Docker with a volume), save to the persistent volume mount point.
+if os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("RENDER"):
+    DATABASE = "/app/data/allybot.db"
+else:
+    DATABASE = "allybot.db"
+    
 ADMIN_PASSWORD = "allybot1122"
 GSCRIPT_URL = "https://script.google.com/macros/s/AKfycbzmnebKFLBtD1gJYXdGQo70-V0Qy4Ly3fLiBFkIkPwLP-Dzmvxj8suMuBYWzQucEBY5SQ/exec"
 
