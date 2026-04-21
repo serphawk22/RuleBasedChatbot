@@ -27,6 +27,9 @@ GSCRIPT_URL = "https://script.google.com/macros/s/AKfycbzmnebKFLBtD1gJYXdGQo70-V
 
 def init_db():
     """Create database table if it doesn't exist and ensure schema is up to date."""
+    db_dir = os.path.dirname(DATABASE)
+    if db_dir:
+        os.makedirs(db_dir, exist_ok=True)
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
     cursor.execute("""
