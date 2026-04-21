@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | AllyBot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script>
+        const savedTheme = localStorage.getItem('allybot-theme');
+        if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(204,0,0,0.12) 0%, transparent 55%),
+                radial-gradient(ellipse at 80% 80%, rgba(204,0,0,0.07) 0%, transparent 55%);
+        }
+        .login-card {
+            position: relative;
+            background: var(--surface);
+            padding: 44px 40px 36px;
+            border-radius: var(--radius);
+            border: 1px solid rgba(204,0,0,0.25);
+            border-top: 3px solid var(--accent);
+            width: 380px;
+            max-width: 92vw;
+            text-align: center;
+            box-shadow:
+                0 0 60px rgba(204,0,0,0.10),
+                0 20px 60px rgba(0,0,0,0.5);
+        }
+        h2 {
+            margin-top: 10px;
+            margin-bottom: 6px;
+            font-weight: 700;
+            color: #ffffff;
+            font-size: 1.3rem;
+        }
+        h2 span { color: var(--accent); }
+        .login-sub {
+            color: var(--text-dim);
+            font-size: 0.83rem;
+            margin-bottom: 28px;
+        }
+        .input-wrap {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.09);
+            color: var(--text);
+            border-radius: 9px;
+            outline: none;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(204,0,0,0.20);
+        }
+        input::placeholder { color: var(--text-dim); }
+        button {
+            width: 100%;
+            padding: 13px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 9px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 20px rgba(204,0,0,0.30);
+            letter-spacing: 0.3px;
+        }
+        button:hover {
+            background: var(--accent-light);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 28px rgba(204,0,0,0.35);
+        }
+        .error {
+            color: var(--danger);
+            font-size: 0.84rem;
+            margin-top: 14px;
+            padding: 10px;
+            background: rgba(255,68,68,0.08);
+            border-radius: 8px;
+            border: 1px solid rgba(255,68,68,0.20);
+        }
+        .login-footer {
+            margin-top: 20px;
+            color: var(--text-dim);
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <button id="theme-toggle" title="Toggle Light/Dark Mode" aria-label="Toggle Theme" style="position: absolute; top: 20px; right: 20px;">
+        <script>document.write(document.documentElement.getAttribute('data-theme') === 'light' ? '🌙' : '☀️');</script>
+    </button>
+    <div class="login-card" style="text-align: center;">
+        <img src="/static/logo.jpg" alt="Ally Tech Logo" style="height: 48px; width: auto; object-fit: contain; margin: 0 auto 12px; display: block;">
+        <h2 style="margin: 0; font-size: 1.6rem; color: var(--accent);">Login</h2>
+        <p class="login-sub" style="margin-top: 6px;">Restricted access · AllyBot Control Panel</p>
+        <form method="POST">
+            <div class="input-wrap">
+                <input type="password" name="password" placeholder="🔒  Enter Admin Password" required autofocus>
+            </div>
+            <button type="submit">Unlock Dashboard →</button>
+        </form>
+        {% if error %}<p class="error">⚠️ {{ error }}</p>{% endif %}
+        <p class="login-footer">© 2025 Ally Tech Services, BTM Layout, Bengaluru</p>
+    </div>
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            const newTheme = isLight ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('allybot-theme', newTheme);
+            themeToggle.textContent = newTheme === 'light' ? '🌙' : '☀️';
+        });
+    </script>
+</body>
+</html>

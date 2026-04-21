@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | AllyBot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script>
+        // Check theme before page renders
+        const savedTheme = localStorage.getItem('allybot-theme');
+        if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+    </script>
+    <style>
+        /* ══ Admin Dashboard — Ally Tech Red/Black Theme ══ */
+        body {
+            display: block;
+            overflow-y: auto;
+            padding: 40px 32px;
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse at 10% 0%, rgba(204,0,0,0.10) 0%, transparent 50%),
+                radial-gradient(ellipse at 90% 100%, rgba(204,0,0,0.06) 0%, transparent 50%);
+        }
+        .container { max-width: 1120px; margin: 0 auto; }
+
+        /* ── Header ── */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 36px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(204,0,0,0.25);
+        }
+        .admin-header h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .admin-header h1 span { color: var(--accent); }
+        .logout-btn {
+            padding: 9px 20px;
+            background: transparent;
+            color: var(--danger);
+            border: 1.5px solid var(--danger);
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        /* ── Stats Bar ── */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid rgba(204,0,0,0.20);
+            border-top: 3px solid var(--accent);
+            border-radius: 12px;
+            padding: 20px 24px;
+            text-align: center;
+        }
+        .stat-card .stat-num {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+            display: block;
+        }
+        .stat-card .stat-label {
+            font-size: 0.78rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* ── Sections ── */
+        .section {
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-left: 3px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+            transition: box-shadow 0.2s;
+        }
+        .section:hover {
+            box-shadow: 0 8px 40px rgba(204,0,0,0.08), 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #fff;
+            gap: 12px;
+        }
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 2px;
+            margin-right: 4px;
+            flex-shrink: 0;
+        }
+
+        /* ── Table ── */
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        thead { background: rgba(204,0,0,0.08); }
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 0.72rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.7px;
+            border-bottom: 1px solid rgba(204,0,0,0.20);
+        }
+        td {
+            padding: 14px 16px;
+            font-size: 0.875rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: var(--text);
+            vertical-align: middle;
+        }
+        tbody tr:hover { background: rgba(204,0,0,0.05); }
+        tbody tr:last-child td { border-bottom: none; }
+
+        /* ── Inputs ── */
+        .rule-input {
+            width: 100%;
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.09);
+            color: var(--text);
+            padding: 9px 12px;
+            border-radius: 7px;
+            outline: none;
+            font-family: inherit;
+            font-size: 0.875rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .rule-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(204,0,0,0.20);
+        }
+
+        /* ── Buttons ── */
+        .btn-save {
+            padding: 10px 22px;
+            background: var(--success);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+        .btn-save:hover { filter: brightness(1.15); transform: translateY(-1px); }
+
+        .btn-add {
+            padding: 8px 16px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-add:hover { background: var(--accent-light); transform: translateY(-1px); }
+
+        .btn-del {
+            width: 30px;
+            height: 30px;
+            font-weight: 800;
+            font-size: 1rem;
+            background: rgba(255,68,68,0.12);
+            color: var(--danger);
+            border: 1px solid rgba(255,68,68,0.30);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-del:hover {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        /* ── Badge ── */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            background: rgba(204,0,0,0.10);
+            border: 1px solid rgba(204,0,0,0.25);
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #ff8080;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            padding: 14px 28px;
+            border-radius: 10px;
+            color: #fff;
+            transform: translateY(100px);
+            transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            z-index: 1000;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+        }
+        .toast.success { background: linear-gradient(135deg, #16a34a, #22c55e); }
+        .toast.error   { background: linear-gradient(135deg, #b91c1c, var(--accent)); }
+        .toast.active  { transform: translateY(0); }
+
+        /* ── Filter Buttons ── */
+        .filter-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(204,0,0,0.30); border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container fade-in">
+        <div class="admin-header">
+            <div style="flex: 1; display: flex; justify-content: flex-start;">
+                <img src="/static/logo.jpg" alt="Ally Tech Logo" style="height: 48px; width: auto; object-fit: contain;">
+            </div>
+            <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
+                <h1 style="margin: 0; font-size: 1.6rem; color: var(--text);">Ally<span>Bot</span> <span style="color: var(--text-dim); font-size: 1.2rem; margin-left: 8px; font-weight: 500;">Admin Dashboard</span></h1>
+            </div>
+            <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 16px;">
+                <button id="theme-toggle" title="Toggle Light/Dark Mode" aria-label="Toggle Theme">
+                    <script>document.write(document.documentElement.getAttribute('data-theme') === 'light' ? '🌙' : '☀️');</script>
+                </button>
+                <a href="/admin/logout" class="logout-btn">Log Out</a>
+            </div>
+        </div>
+
+        <!-- ══════ Rules Management ══════ -->
+        <div class="section">
+            <div class="section-title">
+                Manage Chatbot Rules
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button class="btn-add" onclick="addRow()" style="background: var(--accent);">+ Add Local Rule</button>
+                    <a href="https://docs.google.com/spreadsheets/d/1BLG8o_11SNQYIA31ghc-4TrgGFWqZs5vFUhK6WuX1q4/edit" target="_blank" class="btn-add" style="text-decoration: none; background: #1d8549;">Add to Google Sheet ↗</a>
+                    <button class="btn-save" id="save-btn" onclick="saveRules()" style="margin-top: 0;">Save Local Changes</button>
+                </div>
+            </div>
+            <p style="color: var(--text-dim); margin-top: -15px; margin-bottom: 25px; font-size: 0.85rem;">
+                <strong>Local Rules</strong> are saved to <code>chatbot_rules.xlsx</code>. <strong>Google Sheets</strong> rules are synced every 60 seconds.
+            </p>
+            <table id="rules-table">
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">Regex Pattern</th>
+                        <th style="width: 55%;">Bot Response</th>
+                        <th style="width: 10%;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="rules-body">
+                    {% for rule in rules %}
+                    <tr>
+                        <td><textarea class="rule-input pattern" rows="2">{{ rule.pattern }}</textarea></td>
+                        <td><textarea class="rule-input response" rows="2">{{ rule.response }}</textarea></td>
+                        <td align="center"><button class="btn-del" onclick="this.parentElement.parentElement.remove()">×</button></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ══════ Student Registrations ══════ -->
+        <div class="section">
+            <div class="section-title">
+                Latest Student Registrations
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 20px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <label style="font-size: 0.8rem; color: var(--text-dim); font-weight: 600;">From:</label>
+                    <input type="date" id="filter-from" style="padding: 6px 10px; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-family: inherit; font-size: 0.85rem;">
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <label style="font-size: 0.8rem; color: var(--text-dim); font-weight: 600;">To:</label>
+                    <input type="date" id="filter-to" style="padding: 6px 10px; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-family: inherit; font-size: 0.85rem;">
+                </div>
+                <div style="display: flex; gap: 6px;">
+                    <button onclick="setFilter('today')" class="btn-add" style="background: var(--accent); font-size: 0.75rem; padding: 5px 10px;">Today</button>
+                    <button onclick="setFilter('month')" class="btn-add" style="background: var(--accent); font-size: 0.75rem; padding: 5px 10px;">This Month</button>
+                    <button onclick="setFilter('year')" class="btn-add" style="background: var(--accent); font-size: 0.75rem; padding: 5px 10px;">This Year</button>
+                    <button onclick="setFilter('all')" class="btn-add" style="background: var(--text-dim); font-size: 0.75rem; padding: 5px 10px;">All Time</button>
+                </div>
+                <button onclick="downloadCSV()" class="btn-add" style="background: #2563eb; margin-left: auto; font-size: 0.85rem; padding: 8px 16px;">Download CSV</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S.No</th>
+                            <th>Student Name</th>
+                            <th>Email Address</th>
+                            <th>Phone</th>
+                            <th>Qualification</th>
+                            <th>Interest</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reg in registrations %}
+                        <tr>
+                            <td style="color: var(--text-dim); font-size: 0.9rem;">{{ loop.index }}</td>
+                            <td><strong>{{ reg[1] }}</strong></td>
+                            <td>{{ reg[2] }}</td>
+                            <td>{{ reg[3] }}</td>
+                            <td><span class="badge">{{ reg[6] }}</span></td>
+                            <td><span class="badge">{{ reg[4] }}</span></td>
+                            <td style="color: var(--text-dim); font-size: 0.8rem;">{{ reg[5] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ══════ Admin Access & Sharing ══════ -->
+        <div class="section">
+            <div class="section-title">Admin Access & Collaboration</div>
+            <p style="color: var(--text-dim); font-size: 0.9rem; line-height: 1.6;">
+                To allow other people to manage the chatbot rules:
+            </p>
+            <ol style="color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-left: 20px; margin-top: 10px;">
+                <li>Open the <a href="https://docs.google.com/spreadsheets/d/1BLG8o_11SNQYIA31ghc-4TrgGFWqZs5vFUhK6WuX1q4/edit" target="_blank" style="color: var(--accent);">Google Sheet</a>.</li>
+                <li>Click the <strong>Share</strong> button (top right).</li>
+                <li>Add their email (e.g., collaborator@gmail.com) and set them as an <strong>Editor</strong>.</li>
+                <li>They will then be able to update rules which the bot will automatically fetch.</li>
+            </ol>
+            <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+                <strong>Note:</strong> To give them access to this dashboard, share the login password (<code>allybot1122</code>) with them.
+            </p>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Theme Toggle Logic
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+            const newTheme = isLight ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('allybot-theme', newTheme);
+            themeToggle.textContent = newTheme === 'light' ? '🌙' : '☀️';
+        });
+
+        // Dashboard logic
+        let saveTimeout;
+
+        // Auto-save whenever table is modified
+        document.getElementById('rules-body').addEventListener('input', () => {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(saveRules, 1500); // Save after 1.5s of no typing
+        });
+
+        function addRow() {
+            const body = document.getElementById('rules-body');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><textarea class="rule-input pattern" rows="2" placeholder="e.g. \\b(fees|cost)\\b"></textarea></td>
+                <td><textarea class="rule-input response" rows="2" placeholder="e.g. Our fees range from..."></textarea></td>
+                <td align="center"><button class="btn-del" onclick="this.parentElement.parentElement.remove(); saveRules();">×</button></td>
+            `;
+            body.prepend(tr);
+            tr.querySelector('.pattern').focus();
+        }
+
+        async function saveRules() {
+            const rows = document.querySelectorAll('#rules-body tr');
+            const rules = [];
+            rows.forEach(row => {
+                const p = row.querySelector('.pattern').value.trim();
+                const r = row.querySelector('.response').value.trim();
+                if (p && r) rules.push({ Pattern: p, Response: r });
+            });
+
+            const btn = document.querySelector('.btn-save');
+            btn.textContent = "Saving... 🔄";
+            btn.style.background = "var(--accent)";
+
+            try {
+                const res = await fetch('/admin/save_rules', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rules })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    btn.textContent = "All Changes Saved ✅";
+                    btn.style.background = "var(--success)";
+                } else {
+                    btn.textContent = "Error Saving ❌";
+                    btn.style.background = "var(--danger)";
+                }
+            } catch (err) {
+                btn.textContent = "Offline ⚠️";
+                btn.style.background = "var(--danger)";
+            }
+        }
+
+        // ====== Date Filter & CSV Download ======
+        function pad(n) { return n < 10 ? '0' + n : n; }
+
+        function setFilter(preset) {
+            const fromEl = document.getElementById('filter-from');
+            const toEl = document.getElementById('filter-to');
+            const now = new Date();
+            const today = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+
+            if (preset === 'today') {
+                fromEl.value = today;
+                toEl.value = today;
+            } else if (preset === 'month') {
+                fromEl.value = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-01';
+                toEl.value = today;
+            } else if (preset === 'year') {
+                fromEl.value = now.getFullYear() + '-01-01';
+                toEl.value = today;
+            } else {
+                fromEl.value = '';
+                toEl.value = '';
+            }
+        }
+
+        function downloadCSV() {
+            const from = document.getElementById('filter-from').value;
+            const to = document.getElementById('filter-to').value;
+            let url = '/admin/download_csv?';
+            if (from) url += 'date_from=' + from + '&';
+            if (to) url += 'date_to=' + to + '&';
+            window.location.href = url;
+        }
+    </script>
+</body>
+</html>
