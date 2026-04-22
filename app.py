@@ -16,11 +16,13 @@ app = Flask(__name__, static_folder="templates", static_url_path="/static")
 app.secret_key = "7b2d9a4f6c1e3b5d8a0f9c2e4b7d1a5f6c8e0b2d4a9f3c1e5b7d8a0f2c4e6b9d"  # Auto-generated secure key
 
 # --- Configuration ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # If running on Railway (or Render/Docker with a volume), save to the persistent volume mount point.
 if os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("RENDER"):
     DATABASE = "/app/data/allybot.db"
 else:
-    DATABASE = "allybot.db"
+    DATABASE = os.path.join(BASE_DIR, "allybot.db")
     
 ADMIN_PASSWORD = "allybot1122"
 GSCRIPT_URL = "https://script.google.com/macros/s/AKfycbzmnebKFLBtD1gJYXdGQo70-V0Qy4Ly3fLiBFkIkPwLP-Dzmvxj8suMuBYWzQucEBY5SQ/exec"
@@ -54,6 +56,10 @@ def init_db():
 @app.route("/")
 def home():
     return render_template("index.html")
+
+@app.route("/favicon.ico")
+def favicon():
+    return app.send_static_file("logo.jpg")  # Use logo as temporary favicon or point to actual ico
 
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
@@ -213,6 +219,8 @@ def chat():
     reply = get_response(user_message)
     return jsonify({"reply": reply})
 
+# Initialize database on startup (crucial for Gunicorn)
+init_db()
+
 if __name__ == "__main__":
-    init_db()
     app.run(debug=True, port=5000)
