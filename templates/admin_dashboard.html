@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="/static/style.css">
     <script>
         // Check theme before page renders
-        const savedTheme = localStorage.getItem('allybot-theme');
-        if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+        const savedTheme = localStorage.getItem('allybot-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
     </script>
     <style>
         /* ══ Admin Dashboard — Ally Tech Red/Black Theme ══ */
@@ -209,6 +209,23 @@
             color: #fff;
         }
 
+        .btn-format {
+            padding: 4px 8px;
+            background: var(--card);
+            border: 1px solid var(--border-red);
+            color: var(--text);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+        }
+        .btn-format:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
         /* ── Badge ── */
         .badge {
             display: inline-block;
@@ -286,7 +303,7 @@
                 </div>
             </div>
             <p style="color: var(--text-dim); margin-top: -15px; margin-bottom: 25px; font-size: 0.85rem;">
-                <strong>Local Rules</strong> are saved to <code>chatbot_rules.xlsx</code>. <strong>Google Sheets</strong> rules are synced every 60 seconds.
+                <strong>Local Rules</strong> are saved to <code>chatbot_rules.xlsx</code>. <strong>Google Sheets</strong> rules are synced every 60 seconds. <span style="color: var(--accent); margin-left: 10px;">💡 Tip: Use <b>**bold**</b> for bold and <b>[Name](Link)</b> for hyperlinks.</span>
             </p>
             <table id="rules-table">
                 <thead>
@@ -300,7 +317,10 @@
                     {% for rule in rules %}
                     <tr>
                         <td><textarea class="rule-input pattern" rows="2">{{ rule.pattern }}</textarea></td>
-                        <td><textarea class="rule-input response" rows="2">{{ rule.response }}</textarea></td>
+                        <td>
+                            <button class="btn-format" onclick="makeBold(this)" title="Make Bold">B</button>
+                            <textarea class="rule-input response" rows="2">{{ rule.response }}</textarea>
+                        </td>
                         <td align="center"><button class="btn-del" onclick="this.parentElement.parentElement.remove()">×</button></td>
                     </tr>
                     {% endfor %}
@@ -405,11 +425,31 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><textarea class="rule-input pattern" rows="2" placeholder="e.g. \\b(fees|cost)\\b"></textarea></td>
-                <td><textarea class="rule-input response" rows="2" placeholder="e.g. Our fees range from..."></textarea></td>
+                <td>
+                    <button class="btn-format" onclick="makeBold(this)" title="Make Bold">B</button>
+                    <textarea class="rule-input response" rows="2" placeholder="e.g. Our fees range from..."></textarea>
+                </td>
                 <td align="center"><button class="btn-del" onclick="this.parentElement.parentElement.remove(); saveRules();">×</button></td>
             `;
             body.prepend(tr);
             tr.querySelector('.pattern').focus();
+        }
+
+        function makeBold(btn) {
+            const textarea = btn.nextElementSibling;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selected = text.substring(start, end);
+            
+            if (selected) {
+                textarea.value = text.substring(0, start) + '**' + selected + '**' + text.substring(end);
+                textarea.focus();
+                textarea.setSelectionRange(start, end + 4);
+                saveRules(); // Trigger auto-save
+            } else {
+                alert("Please select some text first to make it bold!");
+            }
         }
 
         async function saveRules() {

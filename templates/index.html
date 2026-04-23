@@ -11,12 +11,34 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .bot-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--border-red);
+            flex-shrink: 0;
+        }
+        .chat-link {
+            color: var(--accent);
+            text-decoration: underline;
+            font-weight: 600;
+        }
+        .chat-link:hover {
+            color: var(--accent-light);
+        }
+        .user .chat-link {
+            color: #fff;
+            text-decoration: underline;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
     <script>
         // Check theme before page renders to prevent flashing
-        const savedTheme = localStorage.getItem('allybot-theme');
-        if (savedTheme) {
-            document.documentElement.setAttribute('data-theme', savedTheme);
-        }
+        // Default to light theme if no preference is saved
+        const savedTheme = localStorage.getItem('allybot-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
     </script>
 </head>
 
@@ -25,23 +47,32 @@
     <!-- ═══════ Registration Overlay ═══════ -->
     <div id="reg-overlay">
         <div id="reg-card">
+            <div class="reg-corner-actions">
+                <a href="https://www.google.com/maps/search/Ally+Tech+Services" target="_blank" class="loc-btn"
+                    title="Our Location" aria-label="Location">📍</a>
+                <button class="theme-toggle" id="reg-theme-toggle" title="Toggle Light/Dark Mode"
+                    aria-label="Toggle Theme">
+                    <script>document.write(document.documentElement.getAttribute('data-theme') === 'light' ? '🌙' : '☀️');</script>
+                </button>
+            </div>
             <div class="reg-header" style="text-align: center; margin-bottom: 26px;">
-                <img src="/static/logo.png" alt="Ally Tech Logo" style="height: 44px; width: auto; object-fit: contain; margin: 0 auto 10px; display: block;">
+                <img src="/static/logo.png" alt="Ally Tech Logo"
+                    style="height: 44px; width: auto; object-fit: contain; margin: 0 auto 10px; display: block;">
                 <h2 style="margin: 0; font-size: 1.5rem; color: var(--accent);">AllyBot</h2>
                 <p style="margin-top: 6px;">Register to start chatting with our institute assistant</p>
             </div>
             <form id="reg-form">
                 <div class="field">
                     <label for="reg-name">Full Name</label>
-                    <input id="reg-name" type="text" placeholder="e.g. Rahul Sharma" required>
+                    <input id="reg-name" type="text" required>
                 </div>
                 <div class="field">
                     <label for="reg-email">Email</label>
-                    <input id="reg-email" type="email" placeholder="e.g. rahul@gmail.com" required>
+                    <input id="reg-email" type="email" required>
                 </div>
                 <div class="field">
                     <label for="reg-phone">Phone Number</label>
-                    <input id="reg-phone" type="tel" placeholder="e.g. 9876543210" required>
+                    <input id="reg-phone" type="tel" required>
                 </div>
                 <div class="field">
                     <label for="reg-qual">Highest Qualification</label>
@@ -99,7 +130,8 @@
                 <div class="status">
                     <span class="dot"></span> Online
                 </div>
-                <button id="theme-toggle" title="Toggle Light/Dark Mode" aria-label="Toggle Theme">
+                <button class="theme-toggle" id="app-theme-toggle" title="Toggle Light/Dark Mode"
+                    aria-label="Toggle Theme">
                     <script>document.write(document.documentElement.getAttribute('data-theme') === 'light' ? '🌙' : '☀️');</script>
                 </button>
             </div>
@@ -145,17 +177,21 @@
         let userName = '';
 
         // Theme Toggle Logic
-        function updateThemeToggleIcon() {
+        function updateThemeIcons() {
             const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-            themeToggle.textContent = isLight ? '🌙' : '☀️';
+            document.querySelectorAll('.theme-toggle').forEach(btn => {
+                btn.textContent = isLight ? '🌙' : '☀️';
+            });
         }
-        
-        themeToggle.addEventListener('click', () => {
-            const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-            const newTheme = isLight ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('allybot-theme', newTheme);
-            updateThemeToggleIcon();
+
+        document.querySelectorAll('.theme-toggle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+                const newTheme = isLight ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('allybot-theme', newTheme);
+                updateThemeIcons();
+            });
         });
 
         regForm.addEventListener('submit', async (e) => {
@@ -182,6 +218,24 @@
                 const data = await res.json();
 
                 if (data.success) {
+                    // --- Celebration Animation (Increased Intensity) ---
+                    const count = 200;
+                    const defaults = { origin: { y: 0.7 }, colors: ['#cc0000', '#ffffff', '#111111'] };
+
+                    function fire(particleRatio, opts) {
+                        confetti({
+                            ...defaults,
+                            ...opts,
+                            particleCount: Math.floor(count * particleRatio)
+                        });
+                    }
+
+                    fire(0.25, { spread: 26, startVelocity: 55 });
+                    fire(0.2, { spread: 60 });
+                    fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+                    fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+                    fire(0.1, { spread: 120, startVelocity: 45 });
+
                     userName = payload.name;
                     const rec = data.recommendation;
                     regOverlay.classList.add('fade-out');
@@ -217,12 +271,24 @@
         }
 
         function addMsg(text, who) {
+            let formattedText = text;
+
+            // 1. Support basic Markdown-style bold (**text**)
+            formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // 2. Support Markdown-style links [Text](URL)
+            formattedText = formattedText.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" class="chat-link">$1</a>');
+
+            // 3. Auto-link raw URLs (if not already handled by Markdown links)
+            const urlRegex = /(?<!href=")(https?:\/\/[^\s]+)/g;
+            formattedText = formattedText.replace(urlRegex, '<a href="$1" target="_blank" class="chat-link">$1</a>');
+
             const div = document.createElement('div');
             div.className = `msg ${who} fade-in`;
             if (who === 'bot') {
-                div.innerHTML = `<div class="avatar">🤖</div><div class="bubble">${text}</div><span class="time">${ts()}</span>`;
+                div.innerHTML = `<img src="/static/bot_avatar.jpg" alt="Bot" class="bot-avatar"><div class="bubble">${formattedText}</div><span class="time">${ts()}</span>`;
             } else {
-                div.innerHTML = `<div class="bubble">${text}</div><span class="time">${ts()}</span>`;
+                div.innerHTML = `<div class="bubble">${formattedText}</div><span class="time">${ts()}</span>`;
             }
             msgs.appendChild(div);
             chatEl.scrollTo({ top: chatEl.scrollHeight, behavior: 'smooth' });
@@ -232,7 +298,7 @@
             const d = document.createElement('div');
             d.id = 'typing';
             d.className = 'msg bot fade-in';
-            d.innerHTML = `<div class="avatar">🤖</div><div class="bubble typing"><span></span><span></span><span></span></div>`;
+            d.innerHTML = `<img src="/static/bot_avatar.jpg" alt="Bot" class="bot-avatar"><div class="bubble typing"><span></span><span></span><span></span></div>`;
             msgs.appendChild(d);
             chatEl.scrollTo({ top: chatEl.scrollHeight, behavior: 'smooth' });
         }
@@ -242,9 +308,49 @@
             if (el) el.remove();
         }
 
+        /* ═══════ Symbol Animations ═══════ */
+        function triggerSymbolAnimation(text) {
+            const lowerText = text.toLowerCase();
+            const scalar = 2.5;
+            let emojis = [];
+
+            // Data Analytics Group
+            if (lowerText.includes('data analytics')) emojis = ['📊', '📈', '📉'];
+            else if (lowerText.includes('excel')) emojis = ['📗', '📊', '📉'];
+            else if (lowerText.includes('vba')) emojis = ['💻', '⚙️', '🛠️'];
+            else if (lowerText.includes('sql')) emojis = ['🗄️', '🔍', '🔢'];
+            else if (lowerText.includes('power bi')) emojis = ['📊', '📉', '💡'];
+            else if (lowerText.includes('python')) emojis = ['🐍', '🧪', '💻'];
+            else if (lowerText.includes('prompt engineering')) emojis = ['🤖', '💡', '⌨️'];
+
+            // ERP Group
+            else if (lowerText.includes('erp')) emojis = ['💼', '🏢', '⚙️'];
+            else if (lowerText.includes('fico')) emojis = ['💰', '🏦', '💹'];
+            else if (lowerText.includes('mm')) emojis = ['📦', '🚛', '🏭'];
+            else if (lowerText.includes('sd')) emojis = ['📈', '🤝', '🚛'];
+            else if (lowerText.includes('hcm')) emojis = ['👥', '🏢', '📋'];
+            else if (lowerText.includes('sf')) emojis = ['☁️', '🚀', '✨'];
+            else if (lowerText.includes('abap')) emojis = ['👨‍💻', '🔧', '💻'];
+
+            if (emojis.length > 0) {
+                const shapes = emojis.map(e => confetti.shapeFromText({ text: e, scalar }));
+                confetti({
+                    shapes: shapes,
+                    particleCount: 50,
+                    spread: 80,
+                    origin: { y: 0.8 },
+                    scalar: scalar
+                });
+            }
+        }
+
         async function send() {
             const text = input.value.trim();
             if (!text) return;
+
+            // Trigger animation based on text
+            triggerSymbolAnimation(text);
+
             addMsg(text, 'user');
             input.value = '';
             input.style.height = 'auto'; // Reset height
