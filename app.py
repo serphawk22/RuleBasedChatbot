@@ -196,14 +196,19 @@ def register():
         # Recommendation logic
         recommendation = ""
         q = qualification.lower()
-        if "ba" == q:
-            recommendation = "Since you have a BA degree, we recommend ERP FICO, Advanced Excel, VBA, and SQL."
+        
+        if q == "other" or not q:
+            recommendation = "Could you please tell me which subjects you're interested in or what kind of career path you're looking for? I'd love to help you find the perfect course for your goals!"
+        elif "ba" == q:
+            recommendation = "Since you have a BA degree, we recommend starting with functional ERP module like **FICO** to kickstart your corporate career."
         elif any(x in q for x in ["bsc", "bca", "be", "btech", "science"]):
-            recommendation = "With your technical background, we recommend ERP ABAP, ERP MM, Python, SQL, and Power BI."
-        elif any(x in q for x in ["bba", "bbm", "business"]):
-            recommendation = "For your business background, we suggest ERP FICO, ERP MM, Power BI, and Advanced Excel."
+            recommendation = "With your technical background, we highly recommend **Data Analytics** (Advanced Excel, VBA, SQL), **ERP ABAP**, **Python**, or **SQL & Power BI** to leverage your analytical skills."
+        elif any(x in q for x in ["bba", "bbm", "bcom", "business","graduate"]):
+            recommendation = "For your business and commerce background, we suggest**ERP Modules**, **Data Analytics** (Advanced Excel, VBA, SQL), **Power BI** to enhance your management and financial reporting capabilities."
+        elif any(x in q for x in ["post graduate"]):
+            recommendation = "As a Post Graduate, we recommend exploring **Advanced ERP Modules**, or **Data Analytics** to transition into leadership or specialist roles."
         else:
-            recommendation = "We recommend starting with Data Analytics (Excel, VBA, SQL) or a functional ERP module like MM."
+            recommendation = "Based on your profile, we recommend starting with **Data Analytics** (Excel, VBA, SQL) or a functional ERP modules."
 
         return jsonify({
             "success": True, 
